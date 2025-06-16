@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2>Welcome, {{ current_user.username }}!</h2>
+</div>
+
+<div class="row mb-4">
+  <div class="col-md-4">
+    <div class="card text-white bg-success mb-3">
+      <div class="card-body">
+        <h5 class="card-title">Total Income</h5>
+        <p class="card-text fs-4">${{ '%.2f'|format(total_income) }}</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-4">
+    <div class="card text-white bg-danger mb-3">
+      <div class="card-body">
+        <h5 class="card-title">Total Expense</h5>
+        <p class="card-text fs-4">${{ '%.2f'|format(total_expense) }}</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-4">
+    <div class="card text-white bg-primary mb-3">
+      <div class="card-body">
+        <h5 class="card-title">Balance</h5>
+        <p class="card-text fs-4">${{ '%.2f'|format(balance) }}</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<h3>Add Transaction</h3>
+<form method="POST" action="{{ url_for('main.add_transaction') }}" class="row g-3 mb-5">
+  <div class="col-md-3">
+    <input type="text" class="form-control" name="title" placeholder="Title" required>
+  </div>
+  <div class="col-md-2">
+    <input type="number" step="0.01" class="form-control" name="amount" placeholder="Amount" required>
+  </div>
+  <div class="col-md-2">
+    <select class="form-select" name="type" required>
+      <option value="" selected disabled>Type</option>
+      <option value="income">Income</option>
+      <option value="expense">Expense</option>
+    </select>
+  </div>
+  <div class="col-md-3">
+    <input type="text" class="form-control" name="category" placeholder="Category" required>
+  </div>
+  <div class="col-md-2">
+    <button type="submit" class="btn btn-primary w-100">Add</button>
+  </div>
+</form>
+
+<h3>Your Transactions</h3>
+{% if transactions %}
+  <table class="table table-striped align-middle">
+    <thead>
+      <tr>
+        <th>Title</th>
+        <th>Amount</th>
+        <th>Type</th>
+        <th>Category</th>
+        <th>Date</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for txn in transactions %}
+      <tr>
+        <td>{{ txn.title }}</td>
+        <td>${{ '%.2f'|format(txn.amount) }}</td>
+        <td>{{ txn.type.capitalize() }}</td>
+        <td>{{ txn.category }}</td>
+        <td>{{ txn.date.strftime('%Y-%m-%d') }}</td>
+        <td>
+          <a href="{{ url_for('main.edit_transaction', txn_id=txn.id) }}" class="btn btn-sm btn-warning me-2">Edit</a>
+
+          <form method="POST" action="{{ url_for('main.delete_transaction', txn_id=txn.id) }}" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this transaction?');">
+            <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% else %}
+  <p>No transactions found.</p>
+{% endif %}
+
+{% endblock %}
